@@ -7,6 +7,24 @@ import ResultsModal from './components/ResultsModal';
 // Get API URL from environment variable or default to localhost
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Function to normalize URL
+const normalizeUrl = (url) => {
+  // Remove leading/trailing whitespace
+  let normalizedUrl = url.trim();
+  
+  // Remove any existing protocol (http:// or https://)
+  normalizedUrl = normalizedUrl.replace(/^(https?:\/\/)?/, '');
+  
+  // Remove any www. prefix
+  normalizedUrl = normalizedUrl.replace(/^www\./, '');
+  
+  // Remove any trailing slashes
+  normalizedUrl = normalizedUrl.replace(/\/$/, '');
+  
+  // Add https:// protocol
+  return `https://${normalizedUrl}`;
+};
+
 function App() {
   const [url, setUrl] = useState('');
   const [urls, setUrls] = useState([]);
@@ -24,7 +42,10 @@ function App() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target.result;
-        const uploadedUrls = text.split('\n').filter(url => url.trim());
+        // Normalize each URL in the uploaded file
+        const uploadedUrls = text.split('\n')
+          .filter(url => url.trim())
+          .map(url => normalizeUrl(url));
         setUrls(uploadedUrls);
       };
       reader.readAsText(file);
@@ -37,7 +58,11 @@ function App() {
     console.log('Starting analysis...');
     
     try {
-      const urlsToAnalyze = urls.length > 0 ? urls : [url];
+      // Normalize URLs before analysis
+      const urlsToAnalyze = urls.length > 0 
+        ? urls.map(url => normalizeUrl(url))
+        : [normalizeUrl(url)];
+      
       console.log('Making request to:', `${API_URL}/api/analyze`);
       console.log('With payload:', { url: urlsToAnalyze[0] });
       
@@ -111,7 +136,7 @@ function App() {
                   value={url}
                   onChange={handleUrlChange}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="https://example.com"
+                  placeholder="example.com"
                 />
               </div>
             </div>
@@ -142,7 +167,7 @@ function App() {
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">
-                    TXT file with one URL per line
+                    TXT file with one URL per line (e.g., example.com)
                   </p>
                 </div>
               </div>
