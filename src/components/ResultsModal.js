@@ -31,68 +31,88 @@ const ResultsModal = ({ results, onClose }) => {
   };
 
   // Helper function to render category details
-  const renderCategoryDetails = (category) => {
-    const categoryData = analysisResults[category] || {};
-    const score = categoryData.score || 0;
-    const maxScore = categoryData.max_score || 100;
-    const strengths = categoryData.strengths || [];
-    const issues = categoryData.issues || [];
-
+  const renderCategoryDetails = (category, data) => {
     return (
       <div key={category} className="p-4 bg-white border rounded-lg">
         <div className="flex justify-between items-center mb-2">
           <span className="font-medium capitalize">{category.replace(/_/g, ' ')}</span>
-          <div className="flex items-center">
-            <span className={`${getScoreColor(score)} font-semibold`}>
-              {formatScore(score)}
-            </span>
-            <span className="text-gray-400 text-sm ml-1">/ {maxScore}</span>
+          {data.score !== undefined && (
+            <div className="flex items-center">
+              <span className={`${getScoreColor(data.score)} font-semibold`}>
+                {formatScore(data.score)}
+              </span>
+              {data.max_score && (
+                <span className="text-gray-400 text-sm ml-1">/ {data.max_score}</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {data.score !== undefined && (
+          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div
+              className={`${getProgressBarColor(data.score)} h-2 rounded-full`}
+              style={{ width: `${(data.score / (data.max_score || 100)) * 100}%` }}
+            ></div>
           </div>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-          <div
-            className={`${getProgressBarColor(score)} h-2 rounded-full`}
-            style={{ width: `${(score / maxScore) * 100}%` }}
-          ></div>
-        </div>
+        )}
         
-        {strengths.length > 0 && (
+        {data.strengths && data.strengths.length > 0 && (
           <div className="mt-3">
             <h5 className="text-sm font-medium text-green-600 mb-1">Strengths</h5>
             <ul className="list-disc list-inside space-y-1">
-              {strengths.map((item, index) => (
+              {data.strengths.map((item, index) => (
                 <li key={index} className="text-sm text-gray-600">{item}</li>
               ))}
             </ul>
           </div>
         )}
 
-        {issues.length > 0 && (
+        {data.issues && data.issues.length > 0 && (
           <div className="mt-3">
             <h5 className="text-sm font-medium text-red-600 mb-1">Issues</h5>
             <ul className="list-disc list-inside space-y-1">
-              {issues.map((item, index) => (
+              {data.issues.map((item, index) => (
                 <li key={index} className="text-sm text-gray-600">{item}</li>
               ))}
             </ul>
           </div>
         )}
+
+        {/* Display any other properties that aren't already shown */}
+        {Object.entries(data).map(([key, value]) => {
+          if (!['score', 'max_score', 'strengths', 'issues'].includes(key) && typeof value !== 'object') {
+            return (
+              <div key={key} className="mt-2">
+                <span className="font-medium capitalize">{key.replace(/_/g, ' ')}: </span>
+                <span className="text-gray-600">{value}</span>
+              </div>
+            );
+          }
+          return null;
+        })}
       </div>
     );
   };
 
-  // Get all categories from the results
-  const categories = Object.keys(analysisResults).filter(key => 
-    typeof analysisResults[key] === 'object' && 
-    analysisResults[key] !== null &&
-    'score' in (analysisResults[key] || {})
-  );
+  // Get categories and their data
+  const categoryData = Object.entries(analysisResults).reduce((acc, [key, value]) => {
+    if (
+      typeof value === 'object' && 
+      value !== null && 
+      !['lead_quality_score'].includes(key) &&
+      key !== 'results'
+    ) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start sticky top-0 bg-white pb-4 z-10">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Analysis Results</h2>
               <p className="mt-1 text-sm text-gray-500">{results.url}</p>
@@ -142,7 +162,9 @@ const ResultsModal = ({ results, onClose }) => {
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Detailed Analysis</h3>
             <div className="space-y-4">
-              {categories.map(category => renderCategoryDetails(category))}
+              {Object.entries(categoryData).map(([category, data]) => 
+                renderCategoryDetails(category, data)
+              )}
             </div>
           </div>
 
