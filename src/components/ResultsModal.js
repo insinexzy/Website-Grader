@@ -30,6 +30,64 @@ const ResultsModal = ({ results, onClose }) => {
     return typeof score === 'number' ? Math.round(score) : score;
   };
 
+  // Helper function to render category details
+  const renderCategoryDetails = (category) => {
+    const categoryData = analysisResults[category] || {};
+    const score = categoryData.score || 0;
+    const maxScore = categoryData.max_score || 100;
+    const strengths = categoryData.strengths || [];
+    const issues = categoryData.issues || [];
+
+    return (
+      <div key={category} className="p-4 bg-white border rounded-lg">
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-medium capitalize">{category.replace(/_/g, ' ')}</span>
+          <div className="flex items-center">
+            <span className={`${getScoreColor(score)} font-semibold`}>
+              {formatScore(score)}
+            </span>
+            <span className="text-gray-400 text-sm ml-1">/ {maxScore}</span>
+          </div>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+          <div
+            className={`${getProgressBarColor(score)} h-2 rounded-full`}
+            style={{ width: `${(score / maxScore) * 100}%` }}
+          ></div>
+        </div>
+        
+        {strengths.length > 0 && (
+          <div className="mt-3">
+            <h5 className="text-sm font-medium text-green-600 mb-1">Strengths</h5>
+            <ul className="list-disc list-inside space-y-1">
+              {strengths.map((item, index) => (
+                <li key={index} className="text-sm text-gray-600">{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {issues.length > 0 && (
+          <div className="mt-3">
+            <h5 className="text-sm font-medium text-red-600 mb-1">Issues</h5>
+            <ul className="list-disc list-inside space-y-1">
+              {issues.map((item, index) => (
+                <li key={index} className="text-sm text-gray-600">{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Get all categories from the results
+  const categories = Object.keys(analysisResults).filter(key => 
+    typeof analysisResults[key] === 'object' && 
+    analysisResults[key] !== null &&
+    'score' in (analysisResults[key] || {})
+  );
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -68,32 +126,27 @@ const ResultsModal = ({ results, onClose }) => {
             </div>
           </div>
 
-          {/* Category Scores */}
-          {analysisResults.category_scores && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Category Scores</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(analysisResults.category_scores).map(([category, score]) => (
-                  <div key={category} className="p-4 bg-white border rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium capitalize">{category.replace(/_/g, ' ')}</span>
-                      <span className={`${getScoreColor(score)} font-semibold`}>
-                        {formatScore(score)}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`${getProgressBarColor(score)} h-2 rounded-full`}
-                        style={{ width: `${score}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* Classification and Lead Potential */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-white border rounded-lg">
+              <h4 className="font-medium text-gray-900">Classification</h4>
+              <p className="mt-1 text-gray-600">{analysisResults.classification || 'Not classified'}</p>
             </div>
-          )}
+            <div className="p-4 bg-white border rounded-lg">
+              <h4 className="font-medium text-gray-900">Lead Potential</h4>
+              <p className="mt-1 text-gray-600">{analysisResults.lead_potential || 'Not evaluated'}</p>
+            </div>
+          </div>
 
-          {/* Lead Quality */}
+          {/* Category Details */}
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Detailed Analysis</h3>
+            <div className="space-y-4">
+              {categories.map(category => renderCategoryDetails(category))}
+            </div>
+          </div>
+
+          {/* Lead Quality Assessment */}
           {analysisResults.lead_quality_score && (
             <div className="mt-6 p-6 bg-white border rounded-lg">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Lead Quality Assessment</h3>
@@ -110,31 +163,13 @@ const ResultsModal = ({ results, onClose }) => {
             </div>
           )}
 
-          {/* Improvement Opportunities */}
-          {analysisResults.improvement_opportunities && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Improvement Opportunities</h3>
-              <div className="space-y-4">
-                {Object.entries(analysisResults.improvement_opportunities).map(([category, items]) => (
-                  <div key={category} className="p-4 bg-white border rounded-lg">
-                    <h4 className="font-medium capitalize text-gray-900 mb-2">
-                      {category.replace(/_/g, ' ')}
-                    </h4>
-                    <ul className="list-disc list-inside space-y-1">
-                      {items.map((item, index) => (
-                        <li key={index} className="text-gray-600">{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Additional Information */}
           <div className="mt-6 text-sm text-gray-500">
             <p>Analysis completed at: {analysisResults.timestamp || results.timestamp}</p>
             <p>Response time: {((analysisResults.load_time || results.load_time || 0) * 1000).toFixed(2)}ms</p>
+            {analysisResults.status_code && (
+              <p>Status code: {analysisResults.status_code}</p>
+            )}
           </div>
         </div>
       </div>
