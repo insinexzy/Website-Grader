@@ -1,0 +1,16 @@
+# Backend dependencies
+# Minimal dependencies for the placeholder backend
+
+flask==3.0.2
+flask-cors==4.0.0
+requests==2.31.0
+
+# Add additional dependencies as needed for the new backend implementation 
+
+beautifulsoup4==4.12.3
+tabulate>=0.9.0
+colorama>=0.4.6
+tldextract>=3.4.0
+validators>=0.20.0
+python-dotenv==1.0.1
+gunicorn==21.2.0 
