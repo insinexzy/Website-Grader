@@ -5,6 +5,9 @@ const ResultsModal = ({ results, onClose }) => {
 
   console.log('Rendering ResultsModal with results:', results);
 
+  // Extract the actual results from the response structure
+  const analysisResults = results.results || results;
+
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
@@ -51,26 +54,26 @@ const ResultsModal = ({ results, onClose }) => {
           <div className="mt-6 p-6 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold text-gray-900">Overall Score</h3>
-              <div className={`${getScoreBgColor(results.total_score)} px-4 py-2 rounded-full`}>
-                <span className={`text-2xl font-bold ${getScoreColor(results.total_score)}`}>
-                  {formatScore(results.total_score)}
+              <div className={`${getScoreBgColor(analysisResults.total_score)} px-4 py-2 rounded-full`}>
+                <span className={`text-2xl font-bold ${getScoreColor(analysisResults.total_score)}`}>
+                  {formatScore(analysisResults.total_score)}
                 </span>
               </div>
             </div>
             <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5">
               <div
-                className={`${getProgressBarColor(results.total_score)} h-2.5 rounded-full`}
-                style={{ width: `${results.total_score}%` }}
+                className={`${getProgressBarColor(analysisResults.total_score)} h-2.5 rounded-full`}
+                style={{ width: `${analysisResults.total_score}%` }}
               ></div>
             </div>
           </div>
 
           {/* Category Scores */}
-          {results.category_scores && (
+          {analysisResults.category_scores && (
             <div className="mt-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Category Scores</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(results.category_scores).map(([category, score]) => (
+                {Object.entries(analysisResults.category_scores).map(([category, score]) => (
                   <div key={category} className="p-4 bg-white border rounded-lg">
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-medium capitalize">{category.replace(/_/g, ' ')}</span>
@@ -91,28 +94,28 @@ const ResultsModal = ({ results, onClose }) => {
           )}
 
           {/* Lead Quality */}
-          {results.lead_quality_score && (
+          {analysisResults.lead_quality_score && (
             <div className="mt-6 p-6 bg-white border rounded-lg">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Lead Quality Assessment</h3>
               <div className="space-y-3">
                 <div className="flex items-center">
                   <span className="font-medium">Priority:</span>
                   <span className="ml-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800">
-                    {results.lead_quality_score.priority}
+                    {analysisResults.lead_quality_score.priority}
                   </span>
                 </div>
-                <p className="text-gray-600">{results.lead_quality_score.reason}</p>
-                <p className="text-gray-600">{results.lead_quality_score.estimated_work}</p>
+                <p className="text-gray-600">{analysisResults.lead_quality_score.reason}</p>
+                <p className="text-gray-600">{analysisResults.lead_quality_score.estimated_work}</p>
               </div>
             </div>
           )}
 
           {/* Improvement Opportunities */}
-          {results.improvement_opportunities && (
+          {analysisResults.improvement_opportunities && (
             <div className="mt-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Improvement Opportunities</h3>
               <div className="space-y-4">
-                {Object.entries(results.improvement_opportunities).map(([category, items]) => (
+                {Object.entries(analysisResults.improvement_opportunities).map(([category, items]) => (
                   <div key={category} className="p-4 bg-white border rounded-lg">
                     <h4 className="font-medium capitalize text-gray-900 mb-2">
                       {category.replace(/_/g, ' ')}
@@ -130,8 +133,8 @@ const ResultsModal = ({ results, onClose }) => {
 
           {/* Additional Information */}
           <div className="mt-6 text-sm text-gray-500">
-            <p>Analysis completed at: {results.timestamp}</p>
-            <p>Response time: {(results.load_time * 1000).toFixed(2)}ms</p>
+            <p>Analysis completed at: {analysisResults.timestamp || results.timestamp}</p>
+            <p>Response time: {((analysisResults.load_time || results.load_time || 0) * 1000).toFixed(2)}ms</p>
           </div>
         </div>
       </div>

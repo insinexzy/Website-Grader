@@ -45,7 +45,13 @@ function App() {
         url: urlsToAnalyze[0] // Currently only analyzing first URL
       });
       
-      console.log('Received response:', response.data);
+      console.log('Raw response:', response);
+      console.log('Response data structure:', {
+        status: response.data.status,
+        url: response.data.url,
+        results: response.data.results
+      });
+      
       setResults(response.data);
       console.log('Set results in state:', response.data);
       setShowModal(true);
