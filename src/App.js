@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ArrowUpTrayIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -34,6 +34,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log('Starting analysis...');
     
     try {
       const urlsToAnalyze = urls.length > 0 ? urls : [url];
@@ -44,16 +45,38 @@ function App() {
         url: urlsToAnalyze[0] // Currently only analyzing first URL
       });
       
+      console.log('Received response:', response.data);
       setResults(response.data);
+      console.log('Set results in state:', response.data);
       setShowModal(true);
+      console.log('Modal should be visible now');
     } catch (error) {
-      console.error('Error analyzing website:', error);
+      console.error('Detailed error information:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
       const errorMessage = error.response?.data?.message || error.message || 'Error analyzing website. Please try again.';
       alert(errorMessage);
     } finally {
+      console.log('Analysis completed, setting loading to false');
       setIsLoading(false);
     }
   };
+
+  // Add logging for state changes
+  useEffect(() => {
+    console.log('Loading state changed:', isLoading);
+  }, [isLoading]);
+
+  useEffect(() => {
+    console.log('Results state changed:', results);
+  }, [results]);
+
+  useEffect(() => {
+    console.log('Modal visibility changed:', showModal);
+  }, [showModal]);
 
   return (
     <div className="min-h-screen bg-gray-50">
