@@ -14,12 +14,13 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Enable CORS with specific settings
+# Configure CORS to allow requests from both development and production
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:8000", "http://127.0.0.1:8000"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "Accept", "Origin"]
+        "origins": [
+            "http://localhost:3000",
+            "https://website-grader.onrender.com"
+        ]
     }
 })
 
@@ -47,8 +48,10 @@ def analyze_website():
         return '', 204
         
     try:
-        logger.debug(f"Received request: {request.data}")
+        logger.info(f"Received headers: {dict(request.headers)}")
+        logger.info(f"Received request data: {request.data}")
         data = request.get_json()
+        logger.info(f"Parsed JSON data: {data}")
         
         if not data:
             logger.error("No JSON data received")
@@ -58,6 +61,8 @@ def analyze_website():
             }), 400
 
         url = data.get('url', '').strip()
+        logger.info(f"Extracted URL: {url}")
+        
         if not url:
             logger.error("No URL provided")
             return jsonify({
@@ -65,7 +70,7 @@ def analyze_website():
                 'message': 'Please provide a valid URL to analyze'
             }), 400
         
-        logger.info(f"Analyzing URL: {url}")
+        logger.info(f"Initializing analysis for URL: {url}")
         grader = WebsiteGraderV4()
         results = grader.analyze_website(url)
         
@@ -76,7 +81,7 @@ def analyze_website():
                 'message': 'Website blocked automated access or could not be reached'
             }), 403
             
-        logger.info(f"Analysis completed for URL: {url}")
+        logger.info(f"Analysis completed successfully for URL: {url}")
         return jsonify({
             'url': url,
             'status': 'completed',
@@ -84,10 +89,11 @@ def analyze_website():
         })
         
     except Exception as e:
-        logger.error(f"Error analyzing website: {str(e)}\n{traceback.format_exc()}")
+        logger.error(f"Error analyzing website: {str(e)}")
+        logger.error(f"Full traceback: {traceback.format_exc()}")
         return jsonify({
             'error': 'Analysis failed',
-            'message': str(e)
+            'message': f"Error: {str(e)}"
         }), 500
 
 if __name__ == '__main__':

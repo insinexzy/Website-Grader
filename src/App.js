@@ -4,6 +4,9 @@ import { ArrowUpTrayIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from './components/LoadingSpinner';
 import ResultsModal from './components/ResultsModal';
 
+// Get API URL from environment variable or default to localhost
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function App() {
   const [url, setUrl] = useState('');
   const [urls, setUrls] = useState([]);
@@ -34,15 +37,19 @@ function App() {
     
     try {
       const urlsToAnalyze = urls.length > 0 ? urls : [url];
-      const response = await axios.post('http://localhost:5000/analyze', {
-        urls: urlsToAnalyze
+      console.log('Making request to:', `${API_URL}/api/analyze`);
+      console.log('With payload:', { url: urlsToAnalyze[0] });
+      
+      const response = await axios.post(`${API_URL}/api/analyze`, {
+        url: urlsToAnalyze[0] // Currently only analyzing first URL
       });
       
       setResults(response.data);
       setShowModal(true);
     } catch (error) {
-      console.error('Error analyzing websites:', error);
-      alert('Error analyzing websites. Please try again.');
+      console.error('Error analyzing website:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Error analyzing website. Please try again.';
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
