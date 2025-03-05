@@ -3,6 +3,7 @@ from flask_cors import CORS
 from website_grader_v4 import WebsiteGraderV4
 import logging
 import traceback
+from github_auth import setup_github_auth
 
 # Configure logging
 logging.basicConfig(
@@ -90,4 +91,7 @@ def analyze_website():
         }), 500
 
 if __name__ == '__main__':
+    # Setup GitHub authentication
+    setup_github_auth()
+    
     app.run(debug=True, host='0.0.0.0', port=5000) 
