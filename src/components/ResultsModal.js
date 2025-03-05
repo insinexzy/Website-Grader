@@ -7,6 +7,7 @@ const ResultsModal = ({ results, onClose }) => {
 
   // Extract the actual results from the response structure
   const analysisResults = results.results || results;
+  console.log('Analysis results after extraction:', analysisResults);
 
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-green-600';
@@ -32,6 +33,7 @@ const ResultsModal = ({ results, onClose }) => {
 
   // Helper function to render category details
   const renderCategoryDetails = (category, data) => {
+    console.log('Rendering category:', category, 'with data:', data);
     return (
       <div key={category} className="p-4 bg-white border rounded-lg">
         <div className="flex justify-between items-center mb-2">
@@ -95,18 +97,34 @@ const ResultsModal = ({ results, onClose }) => {
     );
   };
 
-  // Get categories and their data
-  const categoryData = Object.entries(analysisResults).reduce((acc, [key, value]) => {
-    if (
-      typeof value === 'object' && 
-      value !== null && 
-      !['lead_quality_score'].includes(key) &&
-      key !== 'results'
-    ) {
-      acc[key] = value;
-    }
-    return acc;
-  }, {});
+  // Get categories and their data - Updated logic to handle nested data
+  const getCategoryData = (results) => {
+    const categories = {};
+    
+    Object.entries(results).forEach(([key, value]) => {
+      // Skip specific keys we don't want to show as categories
+      if (
+        key !== 'lead_quality_score' &&
+        key !== 'results' &&
+        key !== 'total_score' &&
+        key !== 'classification' &&
+        key !== 'lead_potential' &&
+        key !== 'timestamp' &&
+        key !== 'load_time' &&
+        key !== 'status_code' &&
+        key !== 'url' &&
+        typeof value === 'object' &&
+        value !== null
+      ) {
+        categories[key] = value;
+      }
+    });
+
+    console.log('Extracted categories:', categories);
+    return categories;
+  };
+
+  const categoryData = getCategoryData(analysisResults);
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
@@ -115,7 +133,7 @@ const ResultsModal = ({ results, onClose }) => {
           <div className="flex justify-between items-start sticky top-0 bg-white pb-4 z-10">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Analysis Results</h2>
-              <p className="mt-1 text-sm text-gray-500">{results.url}</p>
+              <p className="mt-1 text-sm text-gray-500">{analysisResults.url}</p>
             </div>
             <button
               onClick={onClose}
