@@ -1,29 +1,24 @@
 services:
   # Backend API service
   - type: web
-    name: website-grader-api
+    name: website-grader-backend
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.0
-      - key: FLASK_ENV
-        value: production
+        value: 3.8.1
       - key: PORT
-        value: 10000
-    healthCheckPath: /api/health
+        value: 5000
 
-  # Frontend service
+  # Frontend React service
   - type: web
-    name: website-grader-frontend
-    env: node
+    name: website-grader
+    env: static
     buildCommand: npm install && npm run build
-    startCommand: npm start
+    staticPublishPath: ./build
     envVars:
       - key: NODE_VERSION
-        value: 18.x
-      - key: NODE_ENV
-        value: production
+        value: 18.15.0
       - key: REACT_APP_API_URL
-        value: https://website-grader-api.onrender.com 
+        value: https://website-grader-backend.onrender.com 
