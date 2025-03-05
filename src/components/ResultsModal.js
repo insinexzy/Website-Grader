@@ -68,11 +68,11 @@ const ResultsModal = ({ results, onClose }) => {
           <div className={`${getScoreBgColor(analysisResults.total_score)} rounded-lg p-6 mb-6`}>
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">Overall Score</h3>
+              <h3 className="text-xl font-semibold text-gray-900">Overall Score</h3>
                 <p className="mt-1 text-sm text-gray-600">{analysisResults.classification}</p>
               </div>
               <div className={`text-4xl font-bold ${getScoreColor(analysisResults.total_score)}`}>
-                {formatScore(analysisResults.total_score)}
+                  {formatScore(analysisResults.total_score)}
               </div>
             </div>
             <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5">
@@ -116,15 +116,15 @@ const ResultsModal = ({ results, onClose }) => {
                     <h4 className="font-medium text-gray-900">{label}</h4>
                     <div className={`${getScoreColor(percentage)} font-semibold`}>
                       {score}/{maxScore}
-                    </div>
-                  </div>
-                  
+            </div>
+          </div>
+
                   <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
                     <div
                       className={`${getProgressBarColor(percentage)} h-2 rounded-full transition-all duration-500`}
                       style={{ width: `${percentage}%` }}
                     ></div>
-                  </div>
+                </div>
 
                   {/* Details */}
                   {categoryData.details && categoryData.details.length > 0 && (
@@ -135,8 +135,8 @@ const ResultsModal = ({ results, onClose }) => {
                           <li key={index} className="text-sm text-gray-600">{detail}</li>
                         ))}
                       </ul>
-                    </div>
-                  )}
+            </div>
+          )}
 
                   {/* Issues */}
                   {categoryData.issues && categoryData.issues.length > 0 && (
